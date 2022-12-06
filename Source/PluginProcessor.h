@@ -4,6 +4,7 @@ using namespace juce;
 using namespace dsp;
 struct PreAmpProcessor  : public AudioProcessor
 {
+    vector
     float v1;
     float v2;
     enum {
@@ -11,21 +12,25 @@ struct PreAmpProcessor  : public AudioProcessor
         fftSize   = 1 << fftOrder,  
         scopeSize = 512,
     };
+    int samples_per_block;
+    int sample_rate;
 
     PreAmpProcessor::PreAmpProcessor()
         : AudioProcessor (BusesProperties()
             .withInput  ("Input",  AudioChannelSet::stereo(), true)
             .withOutput ("Output", AudioChannelSet::stereo(), true)){ }
-            
     ~PreAmpProcessor(){}
 
     void getStateInformation(MemoryBlock& destData){ }
     void setStateInformation(const void* data, int sizeInBytes){ }
 
     void prepareToPlay(double sampleRate, int samplesPerBlock){
+        samples_per_block = samplesPerBlock;
+        sample_rate = sampleRate;
     }
 
     void releaseResources(){
+
     }
 
     void PreAmpProcessor::processBlock(AudioBuffer<float>& buffer, juce::MidiBuffer& midiMessages){
@@ -33,14 +38,9 @@ struct PreAmpProcessor  : public AudioProcessor
         int in_num  = getTotalNumInputChannels();
         int out_num = getTotalNumOutputChannels();
 
-        //jassert(in_num  == 2);
-        //jassert(out_num == 2);
-        for(int i = 0; i < out_num; ++i){
-           // buffer.clear(i, 0, buffer.getNumSamples());
-        }
 
+        buffer.applyGain(0, samples_per_block, v1);
     }
-    
     AudioProcessorEditor* createEditor() override;
     const String getName() const {return JucePlugin_Name;}
     const String getProgramName(int id) {return {};}
